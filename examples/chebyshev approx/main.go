@@ -122,6 +122,7 @@ func main() {
 	// Decrypts and print the stats about the precision.
 	PrintPrecisionStats(params, ct, sig_values, ecd, dec)
 	PrintPrecisionStats(params, ct, sig_aprx_values, ecd, dec)
+
 }
 
 // GetChebyshevPoly returns the Chebyshev polynomial approximation of f the
