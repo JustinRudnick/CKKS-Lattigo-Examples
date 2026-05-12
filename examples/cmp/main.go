@@ -2,8 +2,7 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/JustinRudnick/CKKS-Lattigo-Examples/printing"
 	"github.com/tuneinsight/lattigo/v6/circuits/ckks/bootstrapping"
 	"github.com/tuneinsight/lattigo/v6/circuits/ckks/comparison"
 	"github.com/tuneinsight/lattigo/v6/circuits/ckks/minimax"
@@ -37,13 +36,18 @@ func main() {
 	sk, ecd, enc, dec, eval := initTools(params)
 	cmpEval := comparison.NewEvaluator(params, minimax.NewEvaluator(params, eval, bootstrapping.NewSecretKeyBootstrapper(params, sk)))
 
-	slots := 1 << params.LogN()
-	// values1 := []float64{-1, -1, 0, 1, 0, -1, 0, 1, 1, 1, 0, 1, 0, 0, 0, -1}
-	values1 := []float64{-25, -25, 0, 25, 0, -25, 0, 25, 25, 25, 0, 25, 0, 0, 0, -25}
-	values2 := []float64{1, 0, -1, -1, 1, 0, 0, 0, -1, 0, 1, -1, -1, 0, 1, 0}
+	sample_domain := [2]float64{-0.5, 0.5} // a very small domain (e.g. [-1, 1]) of the difference is necessary for good results
 
-	fmt.Printf("values1: %v\n", values1)
-	fmt.Printf("values2: %v\n", values2)
+	slots := 1 << params.LogN()
+	values1 := make([]float64, slots)
+	values2 := make([]float64, slots)
+	fillRandom(values1, sample_domain)
+	fillRandom(values2, sample_domain)
+	values1[5] = 15
+	values2[5] = 15
+
+	// fmt.Printf("values1: %v\n", values1)
+	// fmt.Printf("values2: %v\n", values2)
 
 	println("---- Comparison ----")
 
@@ -96,21 +100,23 @@ func main() {
 	//------------------
 
 	pt1 = dec.DecryptNew(ctResult)
-	result := make([]float64, pt1.Slots())
-	err = ecd.Decode(pt1, result)
+	have := make([]float64, pt1.Slots())
+	err = ecd.Decode(pt1, have)
 
+	want := make([]float64, slots)
 	for i := range slots {
-		values1[i] = values1[i] - values2[i]
-	}
-	println()
-	fmt.Printf("correct: %v\n", values1)
-	fmt.Printf("result: %v\n", result)
+		var diff float64 = values1[i] - values2[i]
+		if diff < 0 {
+			want[i] = -1
+		} else if diff == 0 {
+			want[i] = 0
+		} else {
+			want[i] = 1
+		}
 
-	for i := range slots {
-		values2[i] = result[i] - values1[i]
 	}
-	println()
-	fmt.Printf("difference: %v\n", values2)
+
+	printing.PrintSlots(want, have, slots)
 }
 
 func initTools(params ckks.Parameters) (sk *rlwe.SecretKey, ecd *ckks.Encoder, enc *rlwe.Encryptor, dec *rlwe.Decryptor, eval *ckks.Evaluator) {

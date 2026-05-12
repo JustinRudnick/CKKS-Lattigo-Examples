@@ -2,8 +2,7 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/JustinRudnick/CKKS-Lattigo-Examples/printing"
 	"github.com/tuneinsight/lattigo/v6/circuits/ckks/bootstrapping"
 	"github.com/tuneinsight/lattigo/v6/circuits/ckks/inverse"
 	"github.com/tuneinsight/lattigo/v6/circuits/ckks/minimax"
@@ -40,15 +39,14 @@ func main() {
 	sk, ecd, enc, dec, eval := initTools(params)
 	invEval := inverse.NewEvaluator(params, minimax.NewEvaluator(params, eval, bootstrapping.NewSecretKeyBootstrapper(params, sk)))
 
+	sample_domain := [2]float64{-25, 25}
+
 	slots := 1 << params.LogN()
 	values1 := make([]float64, slots)
-	values2 := []float64{1, 2, 4, 3, 2, 2, 3, 7, 4, 3, 5, 5, 2, 1, 3.5, 5}
-	fillNaturalNumbers(values1)
-
-	fmt.Printf("values1: %v\n", values1)
-	fmt.Printf("values2: %v\n", values2)
-
-	println("Operator: *")
+	// values2 := []float64{1, 2, 4, 3, 2, 2, 3, 7, 4, 3, 5, 5, 2, 1, 3.5, 5}
+	values2 := make([]float64, slots)
+	fillRandom(values1, sample_domain)
+	fillRandom(values2, sample_domain)
 
 	pt1 := ckks.NewPlaintext(params, params.MaxLevel()) // Allocates a plaintext at the max level.
 	pt2 := ckks.NewPlaintext(params, params.MaxLevel())
@@ -81,12 +79,6 @@ func main() {
 	// Evaluate Polynomial
 	//------------------
 
-	// inv := func(x big.Float) (y big.Float) {
-	// 	return
-	// }
-
-	// minimax_sign := minimax.GenMinimaxCompositePolynomial(20, 2, 2, []int{15}, inv)
-
 	if ct2, err = invEval.EvaluateFullDomainNew(ct2, float64(log2min), float64(log2max)); err != nil {
 		panic(err)
 	}
@@ -104,21 +96,16 @@ func main() {
 	//------------------
 
 	pt1 = dec.DecryptNew(ct1)
-	result := make([]float64, pt1.Slots())
-	err = ecd.Decode(pt1, result)
+	have := make([]float64, pt1.Slots())
+	err = ecd.Decode(pt1, have)
 
+	want := make([]float64, pt1.Slots())
 	for i := range slots {
-		values1[i] /= values2[i]
+		want[i] = values1[i] / values2[i]
 	}
-	println()
-	fmt.Printf("correct: %v\n", values1)
-	fmt.Printf("result: %v\n", result)
 
-	for i := range slots {
-		values2[i] = result[i] - values1[i]
-	}
-	println()
-	fmt.Printf("difference: %v\n", values2)
+	printing.PrintSlots(want, have, slots)
+
 }
 
 func initTools(params ckks.Parameters) (sk *rlwe.SecretKey, ecd *ckks.Encoder, enc *rlwe.Encryptor, dec *rlwe.Decryptor, eval *ckks.Evaluator) {

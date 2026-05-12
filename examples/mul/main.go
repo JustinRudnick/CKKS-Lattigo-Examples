@@ -2,8 +2,7 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/JustinRudnick/CKKS-Lattigo-Examples/printing"
 	"github.com/tuneinsight/lattigo/v6/core/rlwe"
 	"github.com/tuneinsight/lattigo/v6/ring"
 	"github.com/tuneinsight/lattigo/v6/schemes/ckks"
@@ -40,11 +39,6 @@ func main() {
 	fillRandom(values1, sample_domain)
 	fillRandom(values2, sample_domain)
 
-	fmt.Printf("values1: %v\n", values1)
-	fmt.Printf("values2: %v\n", values2)
-
-	println("Operator: *")
-
 	pt1 := ckks.NewPlaintext(params, params.MaxLevel()) // Allocates a plaintext at the max level.
 	pt2 := ckks.NewPlaintext(params, params.MaxLevel())
 
@@ -76,10 +70,6 @@ func main() {
 	// Evaluate Polynomial
 	//------------------
 
-	// if err := eval.Mul(ct1, pt2, ct1); err != nil {
-	// 	panic(err)
-	// }
-
 	if err := eval.Mul(ct1, ct2, ct1); err != nil {
 		panic(err)
 	}
@@ -91,21 +81,15 @@ func main() {
 	}
 
 	pt1 = dec.DecryptNew(ct1)
-	result := make([]float64, pt1.Slots())
-	err = ecd.Decode(pt1, result)
+	have := make([]float64, pt1.Slots())
+	err = ecd.Decode(pt1, have)
 
+	want := make([]float64, pt1.Slots())
 	for i := range slots {
-		values1[i] *= values2[i]
+		want[i] = values1[i] * values2[i]
 	}
-	println()
-	fmt.Printf("correct: %v\n", values1)
-	fmt.Printf("result: %v\n", result)
 
-	for i := range slots {
-		values2[i] = result[i] - values1[i]
-	}
-	println()
-	fmt.Printf("difference: %v\n", values2)
+	printing.PrintSlots(want, have, slots)
 }
 
 func initTools(params ckks.Parameters) (sk *rlwe.SecretKey, ecd *ckks.Encoder, enc *rlwe.Encryptor, dec *rlwe.Decryptor, eval *ckks.Evaluator) {

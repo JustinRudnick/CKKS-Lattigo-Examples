@@ -2,8 +2,7 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/JustinRudnick/CKKS-Lattigo-Examples/printing"
 	"github.com/tuneinsight/lattigo/v6/core/rlwe"
 	"github.com/tuneinsight/lattigo/v6/ring"
 	"github.com/tuneinsight/lattigo/v6/schemes/ckks"
@@ -52,8 +51,6 @@ func main() {
 	values1 := make([]float64, slots)
 	fillNaturalNumbers(values1)
 
-	fmt.Printf("values1: %v\n", values1)
-
 	pt1 := ckks.NewPlaintext(params, params.MaxLevel()) // Allocates a plaintext at the max level.
 
 	//------------------
@@ -76,8 +73,6 @@ func main() {
 	//------------------
 	// Evaluate Operation
 	//------------------
-	println("rotate ---- by ", rot, " slots ----")
-
 	if err := eval.Rotate(ct1, rot, ct1); err != nil {
 		panic(err)
 	}
@@ -87,10 +82,16 @@ func main() {
 	//------------------
 
 	pt1 = dec.DecryptNew(ct1)
-	result := make([]float64, pt1.Slots())
-	err = ecd.Decode(pt1, result)
+	have := make([]float64, pt1.Slots())
+	err = ecd.Decode(pt1, have)
 
-	fmt.Printf("result: %v\n", result)
+	want := make([]float64, pt1.Slots())
+	for i := range pt1.Slots() {
+		want[i] = values1[(i+rot)%pt1.Slots()]
+	}
+
+	printing.PrintSlots(want, have, pt1.Slots())
+
 }
 
 func fillRandom(v []float64, domain [2]float64) {

@@ -2,8 +2,7 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/JustinRudnick/CKKS-Lattigo-Examples/printing"
 	"github.com/tuneinsight/lattigo/v6/core/rlwe"
 	"github.com/tuneinsight/lattigo/v6/ring"
 	"github.com/tuneinsight/lattigo/v6/schemes/ckks"
@@ -39,11 +38,11 @@ func main() {
 	evk := rlwe.NewMemEvaluationKeySet(rlk)  // Evaluation Key Set with the Relinearization Key
 	eval := ckks.NewEvaluator(params, evk)   // Evaluator
 
+	sample_domain := [2]float64{-25, 25}
+
 	slots := 1 << params.LogN()
 	values1 := make([]float64, slots)
-	fillNaturalNumbers(values1)
-
-	fmt.Printf("values1: %v\n", values1)
+	fillRandom(values1, sample_domain)
 
 	// We generate the `rlwe.GaloisKey`s element that corresponds to these galois elements.
 	// And we update the evaluator's `rlwe.EvaluationKeySet` with the new keys.
@@ -73,7 +72,6 @@ func main() {
 	//------------------
 	// Evaluate Operation
 	//------------------
-	println("evaluate ---- inner sum ----")
 
 	if err := eval.InnerSum(ct1, batches, terms, ct1); err != nil {
 		panic(err)
@@ -84,10 +82,20 @@ func main() {
 	//------------------
 
 	dec.Decrypt(ct1, pt1)
-	result := make([]float64, pt1.Slots())
-	err = ecd.Decode(pt1, result)
+	have := make([]float64, pt1.Slots())
+	err = ecd.Decode(pt1, have)
 
-	fmt.Printf("result: %v\n", result)
+	want := make([]float64, slots)
+	var sum float64 = 0
+	for i := range slots {
+		sum += values1[i]
+	}
+	for i := range slots {
+		want[i] = sum
+	}
+
+	printing.PrintSlots(want, have, slots)
+
 }
 
 func fillRandom(v []float64, domain [2]float64) {

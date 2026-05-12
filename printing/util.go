@@ -90,7 +90,7 @@ func GetStdDeviation(want []float64, have []float64, n int) (res float64, err er
 		sum += math.Pow(have[i]-arithmeticMean, 2)
 	}
 
-	return math.Sqrt(sum / float64(n)), nil
+	return math.Sqrt(sum/float64(n) - 1), nil
 }
 
 func GetVariance(want []float64, have []float64, n int) (res float64, err error) {
@@ -167,7 +167,7 @@ func _GetArithmeticMean(slice []float64, n int) (res float64, err error) {
 	for i := range n {
 		sum += slice[i]
 	}
-	return sum, nil
+	return sum / float64(n), nil
 
 }
 

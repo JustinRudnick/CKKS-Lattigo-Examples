@@ -2,7 +2,10 @@ module ckks_inner_sum
 
 go 1.26.2
 
-require github.com/tuneinsight/lattigo/v6 v6.2.0
+require (
+	github.com/JustinRudnick/CKKS-Lattigo-Examples v0.0.0-20260512080108-68400c6a8387
+	github.com/tuneinsight/lattigo/v6 v6.2.0
+)
 
 require (
 	github.com/ALTree/bigfloat v0.2.0 // indirect

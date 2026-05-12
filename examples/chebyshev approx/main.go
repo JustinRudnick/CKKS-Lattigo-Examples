@@ -2,10 +2,10 @@
 package main
 
 import (
-	"fmt"
 	"math"
 	"math/big"
 
+	"github.com/JustinRudnick/CKKS-Lattigo-Examples/printing"
 	"github.com/tuneinsight/lattigo/v6/circuits/ckks/polynomial"
 	"github.com/tuneinsight/lattigo/v6/core/rlwe"
 	"github.com/tuneinsight/lattigo/v6/ring"
@@ -51,22 +51,16 @@ func main() {
 	pt := ckks.NewPlaintext(params, params.MaxLevel())
 
 	values := make([]float64, pt.Slots())
-	// for i := range values {
-	// 	values[i] = sampling.RandFloat64(sample_domain[0], sample_domain[1])
-	// }
 	fillNaturalNumbers(values)
 
-	println("Max Level:", params.MaxLevel())
-	println("input vector slots:", pt.Slots())
-
-	sigmoid := func(x float64) (y float64) {
+	function := func(x float64) (y float64) {
 		// return 1 / (math.Exp(-x) + 1)
 		return math.Max(0, x) // ReLU
 		// return 1 / x			//inv
 	}
 
 	polynomial_degree := 63
-	sigmoid_approx := polynomial.NewPolynomial(GetChebyshevPoly(sample_domain, polynomial_degree, sigmoid))
+	function_approx := polynomial.NewPolynomial(GetChebyshevPoly(sample_domain, polynomial_degree, function))
 
 	//------------------
 	// Encoding
@@ -90,7 +84,7 @@ func main() {
 	//------------------
 
 	// Retrieves the change of basis y = scalar * x + constant
-	scalar, constant := sigmoid_approx.ChangeOfBasis()
+	scalar, constant := function_approx.ChangeOfBasis()
 
 	// Performes the change of basis Standard -> Chebyshev
 	if err := eval.Mul(ct, scalar, ct); err != nil {
@@ -106,23 +100,25 @@ func main() {
 	}
 
 	// Evaluates the polynomial
-	if ct, err = polyEval.Evaluate(ct, sigmoid_approx, params.DefaultScale()); err != nil {
+	if ct, err = polyEval.Evaluate(ct, function_approx, params.DefaultScale()); err != nil {
 		panic(err)
 	}
 
-	// Allocates a vector for the reference values and
-	// evaluates the same circuit on the plaintext values
-	sig_aprx_values := make([]float64, ct.Slots())
-	sig_values := make([]float64, ct.Slots())
+	//------------------
+	// Decrypt & Decode Polynomial
+	//------------------
+
+	result_pt := dec.DecryptNew(ct)
+
+	have := make([]float64, ct.Slots())
+	ecd.Decode(result_pt, have)
+
+	want := make([]float64, ct.Slots())
 	for i := range ct.Slots() {
-		sig_aprx_values[i], _ = sigmoid_approx.Evaluate(values[i])[0].Float64()
-		sig_values[i] = sigmoid(values[i])
+		want[i] = function(values[i])
 	}
 
-	// Decrypts and print the stats about the precision.
-	PrintPrecisionStats(params, ct, sig_values, ecd, dec)
-	PrintPrecisionStats(params, ct, sig_aprx_values, ecd, dec)
-
+	printing.PrintSlots(want, have, ct.Slots())
 }
 
 // GetChebyshevPoly returns the Chebyshev polynomial approximation of f the
@@ -144,37 +140,6 @@ func GetChebyshevPoly(domain [2]float64, degree int, f64 func(x float64) (y floa
 
 	// Returns the polynomial.
 	return bignum.ChebyshevApproximation(FBig, interval)
-}
-
-// PrintPrecisionStats decrypts, decodes and prints the precision stats of a ciphertext.
-func PrintPrecisionStats(params ckks.Parameters, ct *rlwe.Ciphertext, want []float64, ecd *ckks.Encoder, dec *rlwe.Decryptor) {
-
-	var err error
-
-	// Decrypts the vector of plaintext values
-	pt := dec.DecryptNew(ct)
-
-	// Decodes the plaintext
-	have := make([]float64, ct.Slots())
-	if err = ecd.Decode(pt, have); err != nil {
-		panic(err)
-	}
-
-	// Pretty prints some values
-	fmt.Printf("Have: ")
-	for i := 0; i < 4; i++ {
-		fmt.Printf("%20.15f ", have[i])
-	}
-	fmt.Printf("...\n")
-
-	fmt.Printf("Want: ")
-	for i := 0; i < 4; i++ {
-		fmt.Printf("%20.15f ", want[i])
-	}
-	fmt.Printf("...\n")
-
-	// Pretty prints the precision stats
-	fmt.Println(ckks.GetPrecisionStats(params, ecd, dec, have, want, 0, false).String())
 }
 
 func fillNaturalNumbers(v []float64) {

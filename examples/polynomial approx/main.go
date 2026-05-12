@@ -2,13 +2,15 @@
 package main
 
 import (
-	"fmt"
+	"math/big"
 
+	"github.com/JustinRudnick/CKKS-Lattigo-Examples/printing"
 	"github.com/tuneinsight/lattigo/v6/circuits/ckks/polynomial"
 	"github.com/tuneinsight/lattigo/v6/core/rlwe"
 	"github.com/tuneinsight/lattigo/v6/ring"
 	"github.com/tuneinsight/lattigo/v6/schemes/ckks"
 	"github.com/tuneinsight/lattigo/v6/utils/bignum"
+	"github.com/tuneinsight/lattigo/v6/utils/sampling"
 )
 
 func main() {
@@ -49,10 +51,7 @@ func main() {
 	pt := ckks.NewPlaintext(params, params.MaxLevel())
 
 	values := make([]float64, pt.Slots())
-	// for i := range values {
-	// 	values[i] = sampling.RandFloat64(sample_domain[0], sample_domain[1])
-	// }
-	fillNaturalNumbers(values)
+	fillRandom(values, sample_domain)
 
 	//------------------
 	// Encoding
@@ -77,52 +76,35 @@ func main() {
 
 	coeffs := []float64{0, 0, 1} // f(x) = x^2
 	polynom := bignum.NewPolynomial(bignum.Monomial, coeffs, sample_domain)
-	sigmoid_approx := polynomial.NewPolynomial(polynom)
+	poly_approx := polynomial.NewPolynomial(polynom)
 
-	if ct, err = polyEval.Evaluate(ct, sigmoid_approx, params.DefaultScale()); err != nil {
+	if ct, err = polyEval.Evaluate(ct, poly_approx, params.DefaultScale()); err != nil {
 		panic(err)
 	}
 
-	// Allocates a vector for the reference values and
-	// evaluates the same circuit on the plaintext values
-	poly_aprx_values := make([]float64, ct.Slots())
-	for i := range ct.Slots() {
-		poly_aprx_values[i], _ = sigmoid_approx.Evaluate(values[i])[0].Float64()
+	//------------------
+	// Decryption & Decoding
+	//------------------
+
+	pt = dec.DecryptNew(ct)
+	have := make([]float64, pt.Slots())
+	ecd.Decode(pt, have)
+
+	want := make([]float64, pt.Slots())
+	for i := range pt.Slots() {
+		var tmp *big.Float = bignum.NewFloat(values[i], 64)
+		println((*tmp).Float64())
+		want[i], _ = polynom.Evaluate(tmp).Real().Float64()
 	}
 
-	// Decrypts and print the stats about the precision.
-	PrintPrecisionStats(params, ct, poly_aprx_values, ecd, dec)
+	printing.PrintSlots(want, have, pt.Slots())
+
 }
 
-// PrintPrecisionStats decrypts, decodes and prints the precision stats of a ciphertext.
-func PrintPrecisionStats(params ckks.Parameters, ct *rlwe.Ciphertext, want []float64, ecd *ckks.Encoder, dec *rlwe.Decryptor) {
-
-	var err error
-
-	// Decrypts the vector of plaintext values
-	pt := dec.DecryptNew(ct)
-
-	// Decodes the plaintext
-	have := make([]float64, ct.Slots())
-	if err = ecd.Decode(pt, have); err != nil {
-		panic(err)
+func fillRandom(v []float64, domain [2]float64) {
+	for i := range v {
+		v[i] = sampling.RandFloat64(domain[0], domain[1])
 	}
-
-	// Pretty prints some values
-	fmt.Printf("Have: ")
-	for i := 0; i < 4; i++ {
-		fmt.Printf("%20.15f ", have[i])
-	}
-	fmt.Printf("...\n")
-
-	fmt.Printf("Want: ")
-	for i := 0; i < 4; i++ {
-		fmt.Printf("%20.15f ", want[i])
-	}
-	fmt.Printf("...\n")
-
-	// Pretty prints the precision stats
-	fmt.Println(ckks.GetPrecisionStats(params, ecd, dec, have, want, 0, false).String())
 }
 
 func fillNaturalNumbers(v []float64) {

@@ -2,8 +2,7 @@
 package main
 
 import (
-	"fmt"
-
+	"github.com/JustinRudnick/CKKS-Lattigo-Examples/printing"
 	"github.com/tuneinsight/lattigo/v6/core/rlwe"
 	"github.com/tuneinsight/lattigo/v6/ring"
 	"github.com/tuneinsight/lattigo/v6/schemes/ckks"
@@ -39,13 +38,16 @@ func main() {
 	evk := rlwe.NewMemEvaluationKeySet(rlk)  // Evaluation Key Set with the Relinearization Key
 	eval := ckks.NewEvaluator(params, evk)   // Evaluator
 
+	sample_domain := [2]float64{-25, 25}
+
 	slots := 1 << params.LogN()
 	values1 := make([]float64, slots)
-	fillNaturalNumbers(values1)
-
-	fmt.Printf("values1: %v\n", values1)
+	values2 := make([]float64, slots)
+	fillRandom(values1, sample_domain)
+	fillRandom(values2, sample_domain)
 
 	pt1 := ckks.NewPlaintext(params, params.MaxLevel()) // Allocates a plaintext at the max level.
+	pt2 := ckks.NewPlaintext(params, params.MaxLevel())
 
 	//------------------
 	// Encoding
@@ -54,13 +56,20 @@ func main() {
 	if err = ecd.Encode(values1, pt1); err != nil {
 		panic(err)
 	}
+	if err = ecd.Encode(values2, pt2); err != nil {
+		panic(err)
+	}
 
 	//------------------
 	// Encryption
 	//------------------
 
 	var ct1 *rlwe.Ciphertext
+	var ct2 *rlwe.Ciphertext
 	if ct1, err = enc.EncryptNew(pt1); err != nil {
+		panic(err)
+	}
+	if ct2, err = enc.EncryptNew(pt2); err != nil {
 		panic(err)
 	}
 
@@ -68,14 +77,22 @@ func main() {
 	// Evaluate Operation
 	//------------------
 
+	//multiply
+	if err = eval.MulRelin(ct1, ct2, ct1); err != nil {
+		panic(err)
+	}
+	if err = eval.Rescale(ct1, ct1); err != nil {
+		panic(err)
+	}
+
+	//evaluate inner sum
+
 	// We generate the `rlwe.GaloisKey`s element that corresponds to these galois elements.
 	// And we update the evaluator's `rlwe.EvaluationKeySet` with the new keys.
 
 	batches := 1
 	terms := slots / batches //terms per batch
 	eval = eval.WithKey(rlwe.NewMemEvaluationKeySet(rlk, kgen.GenGaloisKeysNew(params.GaloisElementsForInnerSum(batches, terms), sk)...))
-
-	println("evaluate ---- inner sum ----")
 
 	if err := eval.InnerSum(ct1, batches, terms, ct1); err != nil {
 		panic(err)
@@ -86,10 +103,20 @@ func main() {
 	//------------------
 
 	dec.Decrypt(ct1, pt1)
-	result := make([]float64, pt1.Slots())
-	err = ecd.Decode(pt1, result)
+	have := make([]float64, pt1.Slots())
+	err = ecd.Decode(pt1, have)
 
-	fmt.Printf("result: %v\n", result)
+	want := make([]float64, pt1.Slots())
+	var sum float64 = 0
+	for i := range pt1.Slots() {
+		sum += values1[i] * values2[i]
+	}
+	for i := range pt1.Slots() {
+		want[i] = sum
+	}
+
+	printing.PrintSlots(want, have, pt1.Slots())
+
 }
 
 func fillRandom(v []float64, domain [2]float64) {

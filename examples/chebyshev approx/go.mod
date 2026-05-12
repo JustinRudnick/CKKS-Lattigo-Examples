@@ -2,11 +2,13 @@ module ckks_cheby_approx
 
 go 1.26.2
 
-require github.com/tuneinsight/lattigo/v6 v6.2.0
+require (
+	github.com/JustinRudnick/CKKS-Lattigo-Examples v0.0.0-20260512074808-5a3b9ef5debc
+	github.com/tuneinsight/lattigo/v6 v6.2.0
+)
 
 require (
 	github.com/ALTree/bigfloat v0.2.0 // indirect
-	github.com/JustinRudnick/CKKS-Lattigo-Examples v0.0.0-20260511104538-a1868f799c7c // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/go-cmp v0.7.0 // indirect
 	github.com/kr/text v0.2.0 // indirect

@@ -1,5 +1,7 @@
 github.com/ALTree/bigfloat v0.2.0 h1:AwNzawrpFuw55/YDVlcPw0F0cmmXrmngBHhVrvdXPvM=
 github.com/ALTree/bigfloat v0.2.0/go.mod h1:+NaH2gLeY6RPBPPQf4aRotPPStg+eXc8f9ZaE4vRfD4=
+github.com/JustinRudnick/CKKS-Lattigo-Examples v0.0.0-20260512080108-68400c6a8387 h1:9TdYttfTiwOE40CKbcaqhSZhW0snSmRYQpU9U8xM7kg=
+github.com/JustinRudnick/CKKS-Lattigo-Examples v0.0.0-20260512080108-68400c6a8387/go.mod h1:Sdu7zTH5V+aNrkoHesvHXOKWYM4YGeSpNPYb+Yvsols=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
