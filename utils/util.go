@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"errors"
@@ -8,80 +8,80 @@ import (
 // get absolute error (AE)
 //
 // AE = abs(want - have)
-func getAE(want float64, have float64) (res float64) {
+func GetAE(want float64, have float64) (res float64) {
 	return math.Abs(want - have)
 }
 
-// get mean absolute error (MAE) of the first n elements
+// Get mean absolute error (MAE) of the first n elements
 //
 // MAE = sum(AE)/n
-func getMAE(want []float64, have []float64, n int) (res float64, err error) {
-	return _getMPowE(want, have, n, 1)
+func GetMAE(want []float64, have []float64, n int) (res float64, err error) {
+	return _GetMPowE(want, have, n, 1)
 }
 
-// get mean square error (MSE) of the first n elements
+// Get mean square error (MSE) of the first n elements
 //
 // MSE = sum(AE * AE)/n
-func getMSE(want []float64, have []float64, n int) (res float64, err error) {
-	return _getMPowE(want, have, n, 2)
+func GetMSE(want []float64, have []float64, n int) (res float64, err error) {
+	return _GetMPowE(want, have, n, 2)
 }
 
-// get root mean square error (MSE) of the first n elements
+// Get root mean square error (MSE) of the first n elements
 //
 // MSE = sqrt(sum(AE * AE)/n)
-func getRMSE(want []float64, have []float64, n int) (res float64, err error) {
-	if res, err = getMSE(want, have, n); err != nil {
+func GetRMSE(want []float64, have []float64, n int) (res float64, err error) {
+	if res, err = GetMSE(want, have, n); err != nil {
 		return 0, err
 	}
 	return math.Sqrt(res), nil
 }
 
-// get relative error (RE) of the first n elements
+// Get relative error (RE) of the first n elements
 //
 // RE = |have - want|/|want|
-func getRE(want float64, have float64) (res float64) {
+func GetRE(want float64, have float64) (res float64) {
 	return math.Abs(want-have) / math.Abs(want)
 }
 
-// get relative percentage  error (RPE) of the first n elements
+// Get relative percentage  error (RPE) of the first n elements
 //
 // RPE = 100 * RE
-func getRPE(want float64, have float64) (res float64) {
-	return 100 * getRE(want, have)
+func GetRPE(want float64, have float64) (res float64) {
+	return 100 * GetRE(want, have)
 }
 
-// get the maximum absolue error (MaxAE) of the first n elements
+// Get the maximum absolue error (MaxAE) of the first n elements
 //
-// MaxAE = max(getAE...)
-func getMaxAE(want []float64, have []float64, n int) (res float64, err error) {
-	return _getMaxE(want, have, n, getAE)
+// MaxAE = max(GetAE...)
+func GetMaxAE(want []float64, have []float64, n int) (res float64, err error) {
+	return _GetMaxE(want, have, n, GetAE)
 }
 
-// get the maximum relative error (MaxRE) of the first n elements
+// Get the maximum relative error (MaxRE) of the first n elements
 //
-// MaxRE = max(getRE...)
-func getMaxRE(want []float64, have []float64, n int) (res float64, err error) {
-	return _getMaxE(want, have, n, getRE)
+// MaxRE = max(GetRE...)
+func GetMaxRE(want []float64, have []float64, n int) (res float64, err error) {
+	return _GetMaxE(want, have, n, GetRE)
 }
 
-// get mean absolute percentage error (MAPE) of the first n elements
+// Get mean absolute percentage error (MAPE) of the first n elements
 //
 // MAPE = 100 * MAE
-func getMAPE(want []float64, have []float64, n int) (res float64, err error) {
-	if res, err = getMAE(want, have, n); err != nil {
+func GetMAPE(want []float64, have []float64, n int) (res float64, err error) {
+	if res, err = GetMAE(want, have, n); err != nil {
 		return 0, err
 	}
 	return 100 * res, nil
 }
 
-func getStdDeviation(want []float64, have []float64, n int) (res float64, err error) {
+func GetStdDeviation(want []float64, have []float64, n int) (res float64, err error) {
 	if len(want) < n || len(have) < n {
 		err = errors.New("buffer overflow error.")
 		return 0, err
 	}
 
 	var arithmeticMean float64
-	if arithmeticMean, err = _getArithmeticMean(want, n); err != nil {
+	if arithmeticMean, err = _GetArithmeticMean(want, n); err != nil {
 		return 0, err
 	}
 
@@ -93,8 +93,8 @@ func getStdDeviation(want []float64, have []float64, n int) (res float64, err er
 	return math.Sqrt(sum / float64(n)), nil
 }
 
-func getVariance(want []float64, have []float64, n int) (res float64, err error) {
-	if res, err = getStdDeviation(want, have, n); err != nil {
+func GetVariance(want []float64, have []float64, n int) (res float64, err error) {
+	if res, err = GetStdDeviation(want, have, n); err != nil {
 		return 0, err
 	}
 	return math.Pow(res, 2), nil
@@ -102,34 +102,34 @@ func getVariance(want []float64, have []float64, n int) (res float64, err error)
 
 //########################## print functions #####################################################
 
-func printSlot(want float64, have float64) {
-	println(want, "\t", have, "\t", getAE(want, have), "\t", getRE(want, have))
+func PrintSlot(want float64, have float64) {
+	println(want, "\t", have, "\t", GetAE(want, have), "\t", GetRE(want, have))
 }
 
-func printSlots(want []float64, have []float64, n int) {
+func PrintSlots(want []float64, have []float64, n int) {
 
 	println("WANT\t\t\tHAVE\t\t\tabs. ERROR\t\t\trel. ERROR")
 
 	for i := range n {
-		printSlot(want[i], have[i])
+		PrintSlot(want[i], have[i])
 	}
 
 	println()
-	println("MAE:\t\t", _printValuetNoErr(want, have, n, getMAE))
-	println("MSE:\t\t", _printValuetNoErr(want, have, n, getMSE))
-	println("RMSE:\t\t", _printValuetNoErr(want, have, n, getRMSE))
-	println("Max AE:\t\t", _printValuetNoErr(want, have, n, getMaxAE))
-	println("Max RE:\t\t", _printValuetNoErr(want, have, n, getMaxRE))
-	println("std. deviation:\t", _printValuetNoErr(want, have, n, getStdDeviation))
-	println("variance:\t", _printValuetNoErr(want, have, n, getVariance))
+	println("MAE:\t\t", _printValuetNoErr(want, have, n, GetMAE))
+	println("MSE:\t\t", _printValuetNoErr(want, have, n, GetMSE))
+	println("RMSE:\t\t", _printValuetNoErr(want, have, n, GetRMSE))
+	println("Max AE:\t\t", _printValuetNoErr(want, have, n, GetMaxAE))
+	println("Max RE:\t\t", _printValuetNoErr(want, have, n, GetMaxRE))
+	println("std. deviation:\t", _printValuetNoErr(want, have, n, GetStdDeviation))
+	println("variance:\t", _printValuetNoErr(want, have, n, GetVariance))
 }
 
 //########################## helper functions ####################################################
 
-// get mean pow error (MPowE) of the first n elements
+// Get mean pow error (MPowE) of the first n elements
 //
 // MPowE = sum(AE^pow)/n
-func _getMPowE(want []float64, have []float64, n int, pow float64) (res float64, err error) {
+func _GetMPowE(want []float64, have []float64, n int, pow float64) (res float64, err error) {
 
 	if len(want) < n || len(have) < n {
 		err = errors.New("buffer overflow error.")
@@ -138,13 +138,13 @@ func _getMPowE(want []float64, have []float64, n int, pow float64) (res float64,
 
 	var sum float64 = 0
 	for i := range n {
-		sum += math.Pow(getAE(want[i], have[i]), pow)
+		sum += math.Pow(GetAE(want[i], have[i]), pow)
 	}
 
 	return sum / float64(n), nil
 }
 
-func _getMaxE(want []float64, have []float64, n int, fnc func(want float64, have float64) (res float64)) (res float64, err error) {
+func _GetMaxE(want []float64, have []float64, n int, fnc func(want float64, have float64) (res float64)) (res float64, err error) {
 	if len(want) < n || len(have) < n {
 		err = errors.New("buffer overflow error.")
 		return 0, err
@@ -157,7 +157,7 @@ func _getMaxE(want []float64, have []float64, n int, fnc func(want float64, have
 	return max, nil
 }
 
-func _getArithmeticMean(slice []float64, n int) (res float64, err error) {
+func _GetArithmeticMean(slice []float64, n int) (res float64, err error) {
 	if len(slice) < n {
 		err = errors.New("buffer overflow error.")
 		return 0, err

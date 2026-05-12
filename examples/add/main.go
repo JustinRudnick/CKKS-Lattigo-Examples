@@ -8,6 +8,8 @@ import (
 	"github.com/tuneinsight/lattigo/v6/ring"
 	"github.com/tuneinsight/lattigo/v6/schemes/ckks"
 	"github.com/tuneinsight/lattigo/v6/utils/sampling"
+
+	"github.com/JustinRudnick/CKKS-Lattigo-Examples/utils"
 )
 
 func main() {
@@ -108,7 +110,7 @@ func main() {
 	// fmt.Printf("difference: %v\n", values2)
 
 	// println()
-	printSlots(values1, result, 1<<params.LogN())
+	utils.PrintSlots(values1, result, 1<<params.LogN())
 
 }
 
