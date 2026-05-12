@@ -4,7 +4,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/JustinRudnick/Test/util"
+	"github.com/JustinRudnick/CKKS-Lattigo-Examples/util"
 	"github.com/tuneinsight/lattigo/v6/core/rlwe"
 	"github.com/tuneinsight/lattigo/v6/ring"
 	"github.com/tuneinsight/lattigo/v6/schemes/ckks"
@@ -98,17 +98,7 @@ func main() {
 	for i := range pt1.Slots() {
 		values1[i] += values2[i]
 	}
-	// println()
-	// fmt.Printf("correct: %v\n", values1)
-	// fmt.Printf("result: %v\n", result)
 
-	// for i := range pt2.Slots() {
-	// 	values2[i] = result[i] - values1[i]
-	// }
-	// println()
-	// fmt.Printf("difference: %v\n", values2)
-
-	// println()
 	util.PrintSlots(values1, result, 1<<params.LogN())
 
 }
