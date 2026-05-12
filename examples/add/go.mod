@@ -3,7 +3,7 @@ module ckks_add
 go 1.26.2
 
 require (
-	github.com/JustinRudnick/CKKS-Lattigo-Examples v0.0.0-20260511121209-ff0c4d99fb74
+	github.com/JustinRudnick/CKKS-Lattigo-Examples v0.0.0-20260512074808-5a3b9ef5debc
 	github.com/tuneinsight/lattigo/v6 v6.2.0
 )
 

@@ -2,6 +2,8 @@ github.com/ALTree/bigfloat v0.2.0 h1:AwNzawrpFuw55/YDVlcPw0F0cmmXrmngBHhVrvdXPvM
 github.com/ALTree/bigfloat v0.2.0/go.mod h1:+NaH2gLeY6RPBPPQf4aRotPPStg+eXc8f9ZaE4vRfD4=
 github.com/JustinRudnick/CKKS-Lattigo-Examples v0.0.0-20260511121209-ff0c4d99fb74 h1:9/8lqsNvPc/NWjjHPCFbmJzkxtkUSrhBmTQwCGu2Sjg=
 github.com/JustinRudnick/CKKS-Lattigo-Examples v0.0.0-20260511121209-ff0c4d99fb74/go.mod h1:Sdu7zTH5V+aNrkoHesvHXOKWYM4YGeSpNPYb+Yvsols=
+github.com/JustinRudnick/CKKS-Lattigo-Examples v0.0.0-20260512074808-5a3b9ef5debc h1:jWTS/Aif5YiieTSQu6EL6IQbwTnulF8h4JdLJZR9E3k=
+github.com/JustinRudnick/CKKS-Lattigo-Examples v0.0.0-20260512074808-5a3b9ef5debc/go.mod h1:Sdu7zTH5V+aNrkoHesvHXOKWYM4YGeSpNPYb+Yvsols=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

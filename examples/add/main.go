@@ -4,7 +4,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/JustinRudnick/CKKS-Lattigo-Examples/util"
+	"github.com/JustinRudnick/CKKS-Lattigo-Examples/printing"
 	"github.com/tuneinsight/lattigo/v6/core/rlwe"
 	"github.com/tuneinsight/lattigo/v6/ring"
 	"github.com/tuneinsight/lattigo/v6/schemes/ckks"
@@ -99,7 +99,7 @@ func main() {
 		values1[i] += values2[i]
 	}
 
-	util.PrintSlots(values1, result, 1<<params.LogN())
+	printing.PrintSlots(values1, result, 1<<params.LogN())
 
 }
 
